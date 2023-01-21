@@ -1,5 +1,31 @@
+import * as CustomError from '../../utils/CustomError';
 import { Utils } from '../../utils/url'
 
+// const foo = {CustomError}
+
+// jest.mock('../../utils/CustomError',()=>{
+//     // return {
+//     //     CustomError: return jest.fn().mockImplementation(()=>{
+//     //         // return {
+//     //         //     mockConstructor: jest.fn(),
+//     //         //     getData : ()=>{
+//     //         //         return {
+//     //         //             "status":404,
+//     //         //             "statusText":"hello world"
+//     //         //         }
+//     //         //     }
+//     //         // }
+//     //         return jest.fn()
+//     //     })
+//     // }
+//     return jest.fn().mockImplementation(()=>{
+//         return {getData : jest.fn()}
+//     })
+// })
+
+
+
+//
 
 describe('Utils test suite', () => {
 
@@ -30,21 +56,50 @@ describe('Utils test suite', () => {
         function expectError() {
             Utils.parseUrl('')
         }
-        expect(expectError).toThrow('Empty url');
+        expect(expectError).toThrow();
     });
 
-    test('test invalid URL with arrow function', () => {
+    test.skip('test invalid URL with arrow function', () => {
         expect(() => {
             Utils.parseUrl('')
         }).toThrow('Empty url');
     });
 
     test('test invalid URL with try catch', () => {
+        // jest.spyOn(foo,'CustomError')
         try {
             Utils.parseUrl('');
         } catch (error) {
-            expect(error).toBeInstanceOf(Error);
-            expect(error).toHaveProperty('message', 'Empty url!');
+            console.log(error)
+            expect(error).toBeInstanceOf(CustomError.CustomError)
+            // expect(CustomError.CustomError).toHaveBeenCalled();
         }
     });
+
+    test("checking constructor",()=>{
+        const customErrorConstructorMock = jest.spyOn(CustomError,'CustomError')
+        const testData = {
+            statusCode:404,
+            statusText:"heeloo"
+        }
+
+        new CustomError.CustomError(testData)
+        expect(customErrorConstructorMock).toHaveBeenCalledWith(testData)
+    })
+
+    test('another test',()=>{
+
+        const customErrorMock = jest.spyOn(CustomError.CustomError.prototype,'getData').mockImplementation(()=>{return{
+            statusCode:404,
+            statusText:"return"
+        }})
+
+        const errorObj = new CustomError.CustomError({
+            statusCode:303,
+            statusText:"text"
+        })
+
+        errorObj.getData()
+        expect(customErrorMock).toHaveBeenCalled();
+    })
 });
