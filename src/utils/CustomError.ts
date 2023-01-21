@@ -20,4 +20,8 @@ interface CustomErrorProps {
     public getData(){
       return this.data
     }
+
+    public setData(data:CustomErrorProps){
+      this.data = data
+    }
   }

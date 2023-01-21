@@ -4,37 +4,29 @@ import { Utils } from "../../utils/url";
 //Consts
 const parsedUrl = Utils.parseUrl("http://localhost:8080/login?username=nestgo");
 
+jest.mock("../../utils/CustomError")
+
 describe("Utils test suite", () => {
   describe("Utils", () => {
     test("first test", () => {
       const result = Utils.toUpperCase("abc");
       expect(result).toBe("ABC");
     });
-
-    it("given an url,retruns the href", () => {
-      const href = parsedUrl.href;
-      const expectedHref = "http://localhost:8080/login?username=nestgo";
-
-      expect(href).toBe(expectedHref);
-    });
-
-    it("given a url, return the port", () => {
-      const port = parsedUrl.port;
-      expect(parsedUrl.port).toBe("8080");
-    });
-
-    it("given a url, return the protocol", () => {
-      const protocol = parsedUrl.protocol;
-      expect(parsedUrl.protocol).toBe("http:");
-    });
-
-    it("given a url, return the query", () => {
-      const query = parsedUrl.query;
-      const expectedObj = {
+    it.each([
+      [parsedUrl.href,'http://localhost:8080/login?username=nestgo'],
+      [parsedUrl.port,'8080'],
+      [parsedUrl.protocol,"http:"],
+      [parsedUrl.query,{
         username: "nestgo",
-      };
-      expect(query).toEqual(expectedObj); // deep equality
-    });
+      }]
+    ])("given an url,returns the property (%p) of url",(check,expected)=>{
+      if( typeof expected === 'object'){
+        expect(check).toEqual(expected)
+      }
+      else{
+        expect(check).toBe(expected)
+      }
+    })
 
     it("given an url, thorws error", () => {
       function expectError() {
@@ -86,6 +78,21 @@ describe("Utils test suite", () => {
       });
 
       errorObj.getData();
+      expect(customErrorMock).toHaveBeenCalled();
+    });
+
+    it("given invalid url throws custom error, sets the proper data", () => {
+      const customErrorMock = jest
+        .spyOn(CustomError.CustomError.prototype, "setData")
+        .mockImplementation(() => {});
+      const mockData = {
+        statusCode: 303,
+        statusText: "text",
+      }
+
+      const errorObj = new CustomError.CustomError(mockData);
+
+      errorObj.setData(mockData);
       expect(customErrorMock).toHaveBeenCalled();
     });
   });
